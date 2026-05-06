@@ -23,7 +23,26 @@ class PlatformEnvTest {
                     )
                 )
             )
-        assertEquals(PlatformEnv("p-1", "Demo Project", "http://forge:8080"), env)
+        assertEquals(
+            PlatformEnv("p-1", "Demo Project", "http://forge:8080", pushId = null),
+            env,
+        )
+    }
+
+    @Test
+    fun `pushId surfaces when GROUNDS_PUSH_ID is set`() {
+        val env =
+            readPlatformEnv(
+                reader(
+                    mapOf(
+                        "GROUNDS_PROJECT_ID" to "p-1",
+                        "GROUNDS_PROJECT_NAME" to "P",
+                        "GROUNDS_FORGE_URL" to "http://forge",
+                        "GROUNDS_PUSH_ID" to "abc12345-6789-0abc-def0-123456789abc",
+                    )
+                )
+            )
+        assertEquals("abc12345-6789-0abc-def0-123456789abc", env?.pushId)
     }
 
     @Test

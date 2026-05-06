@@ -21,6 +21,11 @@ repositories {
 
 dependencies {
     compileOnly("io.papermc.paper:paper-api:1.21.4-R0.1-SNAPSHOT")
+    // Tests need Paper on both compile + runtime classpaths because
+    // Mockito loads the target class to generate the proxy. testCompileOnly
+    // alone passes compilation but throws ClassNotFoundException when
+    // mock(Server::class) runs.
+    testImplementation("io.papermc.paper:paper-api:1.21.4-R0.1-SNAPSHOT")
 
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
     // Compact JSON parser — sufficient for the small whitelist payloads

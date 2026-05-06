@@ -36,9 +36,10 @@ class GroundsPlatformPlugin : JavaPlugin() {
             )
         }
 
-        MotdSetter(server).apply(env.projectName)
+        MotdSetter(server).apply(env.projectName, env.pushId)
         logger.info(
-            "MOTD set from platform context (projectId=${env.projectId}, projectName=${env.projectName})"
+            "MOTD set from platform context (projectId=${env.projectId}, " +
+                "projectName=${env.projectName}, pushId=${env.pushId ?: "n/a"})"
         )
 
         val sync = WhitelistSync(server, logger)
