@@ -23,10 +23,7 @@ class PlatformEnvTest {
                     )
                 )
             )
-        assertEquals(
-            PlatformEnv("p-1", "Demo Project", "http://forge:8080", pushId = null),
-            env,
-        )
+        assertEquals(PlatformEnv("p-1", "Demo Project", "http://forge:8080", pushId = null), env)
     }
 
     @Test

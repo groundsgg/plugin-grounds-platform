@@ -14,10 +14,9 @@ data class PlatformEnv(
     val projectName: String,
     val forgeUrl: String,
     /**
-     * Push ID of the deployment that produced this pod (the renderer's
-     * `GROUNDS_PUSH_ID` env). Optional — older deployments may not have
-     * it. Surfaced in the MOTD as a "version" tag for operator
-     * orientation; whitelist sync doesn't depend on it.
+     * Push ID of the deployment that produced this pod (the renderer's `GROUNDS_PUSH_ID` env).
+     * Optional — older deployments may not have it. Surfaced in the MOTD as a "version" tag for
+     * operator orientation; whitelist sync doesn't depend on it.
      */
     val pushId: String? = null,
 )
