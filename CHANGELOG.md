@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.2](https://github.com/groundsgg/plugin-grounds-platform/compare/v0.1.1...v0.1.2) (2026-05-06)
+
+
+### Bug Fixes
+
+* **whitelist:** drop kotlin-reflect via Moshi codegen ([5013c2e](https://github.com/groundsgg/plugin-grounds-platform/commit/5013c2e45112ec44e238a655d5ad13cae0169a36))
+
 ## [0.1.1](https://github.com/groundsgg/plugin-grounds-platform/compare/v0.1.0...v0.1.1) (2026-05-06)
 
 
