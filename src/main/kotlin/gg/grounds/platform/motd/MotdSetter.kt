@@ -3,18 +3,33 @@ package gg.grounds.platform.motd
 import org.bukkit.Server
 
 /**
- * Sets the server MOTD to a project-aware string at startup. Format:
+ * Sets the server MOTD to a project-aware string at startup. Two lines, joined by a single newline
+ * (the only separator Paper's MOTD field accepts):
+ * - Line one: `§f<projectName> §8<short pushId>`
+ * - Line two: `§8powered by Grounds Developer Platform`
  *
- * <Project Name> §8via Grounds
- *
- * Two lines because Paper's MOTD field accepts a single newline; the second line uses §8 (dark
- * grey) to keep the platform attribution subtle. Operators can override post-startup via `/motd` if
- * Paper supports it on their server, or a future per-project MOTD setting.
+ * Project name in bright white, push-id tail in dim grey so operators can tell at a glance which
+ * deployment is running. Color codes use the §-prefix legacy form which Paper renders consistently
+ * across vanilla + modded clients.
  */
 class MotdSetter(private val server: Server) {
 
-    fun apply(projectName: String) {
-        val motd = "$projectName\n§8via Grounds"
+    fun apply(projectName: String, pushId: String? = null) {
+        val versionSuffix =
+            pushId
+                ?.let { it.replace("-", "").take(SHORT_PUSH_ID_LEN) }
+                ?.takeIf { it.isNotEmpty() }
+                ?.let { " §8$it" } ?: ""
+        val motd = "§f$projectName$versionSuffix\n§8powered by Grounds Developer Platform"
         server.setMotd(motd)
+    }
+
+    companion object {
+        /**
+         * Push IDs are UUIDs. We strip dashes and keep the first 8 chars to mirror the portal's
+         * push- row convention (`p.id.slice(0, 8)` in `pushes-table.tsx`). Long enough to be
+         * near-unique within a project, short enough not to dominate the MOTD line.
+         */
+        private const val SHORT_PUSH_ID_LEN = 8
     }
 }
