@@ -1,9 +1,8 @@
 package gg.grounds.platform.whitelist
 
 import com.squareup.moshi.JsonAdapter
+import com.squareup.moshi.JsonClass
 import com.squareup.moshi.Moshi
-import com.squareup.moshi.Types
-import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import java.net.URI
 import java.net.http.HttpClient
 import java.net.http.HttpRequest
@@ -33,8 +32,12 @@ class WhitelistApiClient(
         HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(5)).build(),
 ) {
 
+    // Codegen-backed adapter: KSP generates ListResponseJsonAdapter at
+    // compile time, no kotlin-reflect on the runtime classpath. Mandatory
+    // because shadowJar's `relocate(kotlin)` corrupts the .kotlin_builtins
+    // resources that the reflection-based adapter loads.
     private val adapter: JsonAdapter<ListResponse> =
-        Moshi.Builder().add(KotlinJsonAdapterFactory()).build().adapter(ListResponse::class.java)
+        Moshi.Builder().build().adapter(ListResponse::class.java)
 
     /**
      * Fetches the current whitelist. Throws on any non-2xx — caller decides whether to surface or
@@ -69,11 +72,9 @@ class WhitelistApiClient(
         return parsed.items.map { WhitelistEntry(mcUuid = it.mcUuid, mcUsername = it.mcUsername) }
     }
 
-    private data class ListResponse(val items: List<RawEntry>) {
+    @JsonClass(generateAdapter = true)
+    internal data class ListResponse(val items: List<RawEntry>) {
+        @JsonClass(generateAdapter = true)
         data class RawEntry(val mcUuid: String, val mcUsername: String)
     }
-
-    @Suppress("unused")
-    private val typeRef =
-        Types.newParameterizedType(List::class.java, ListResponse.RawEntry::class.java)
 }
