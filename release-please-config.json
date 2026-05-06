@@ -5,8 +5,7 @@
   "bump-patch-for-minor-pre-major": true,
   "packages": {
     ".": {
-      "package-name": "plugin-grounds-platform",
-      "release-as": "0.1.0"
+      "package-name": "plugin-grounds-platform"
     }
   }
 }
