@@ -23,23 +23,24 @@ class GroundsPlatformPlugin : JavaPlugin() {
         val env = readPlatformEnv()
         if (env == null) {
             logger.warning(
-                "Started without platform context (reason=missing_env, " +
-                    "expected=GROUNDS_PROJECT_ID,GROUNDS_PROJECT_NAME,GROUNDS_FORGE_URL); " +
-                    "MOTD + whitelist sync disabled"
+                "Platform integration disabled (reason=missing_env, " +
+                    "expected=GROUNDS_PROJECT_ID,GROUNDS_PROJECT_NAME,GROUNDS_FORGE_URL," +
+                    "GROUNDS_APP_NAME, features=motd_whitelist_sync)"
             )
             return
         }
         if (readForgeToken() == null) {
             logger.warning(
-                "Started without forge token (reason=GROUNDS_TOKEN_unset, " +
-                    "projectId=${env.projectId}); whitelist sync disabled"
+                "Whitelist sync disabled (reason=GROUNDS_TOKEN_unset, " +
+                    "projectId=${env.projectId}, appName=${env.appName})"
             )
         }
 
         MotdSetter(server).apply(env.projectName, env.pushId)
         logger.info(
-            "MOTD set from platform context (projectId=${env.projectId}, " +
-                "projectName=${env.projectName}, pushId=${env.pushId ?: "n/a"})"
+            "MOTD updated successfully (projectId=${env.projectId}, " +
+                "projectName=${env.projectName}, appName=${env.appName}, " +
+                "pushId=${env.pushId ?: "n/a"})"
         )
 
         val sync = WhitelistSync(server, logger)
@@ -49,6 +50,7 @@ class GroundsPlatformPlugin : JavaPlugin() {
             WhitelistApiClient(
                 forgeUrl = env.forgeUrl,
                 projectId = env.projectId,
+                appName = env.appName,
                 tokenProvider = ::readForgeToken,
             )
 
@@ -69,7 +71,8 @@ class GroundsPlatformPlugin : JavaPlugin() {
                     } catch (e: Exception) {
                         logger.log(
                             Level.WARNING,
-                            "Whitelist sync failed; will retry on next tick",
+                            "Whitelist sync failed (projectId=${env.projectId}, " +
+                                "appName=${env.appName}, retry=next_tick)",
                             e,
                         )
                     }
@@ -79,8 +82,9 @@ class GroundsPlatformPlugin : JavaPlugin() {
             )
 
         logger.info(
-            "Started platform plugin successfully " +
-                "(projectId=${env.projectId}, forgeUrl=${env.forgeUrl}, pollSeconds=30)"
+            "Platform plugin started successfully " +
+                "(projectId=${env.projectId}, appName=${env.appName}, " +
+                "forgeUrl=${env.forgeUrl}, pollSeconds=30)"
         )
     }
 

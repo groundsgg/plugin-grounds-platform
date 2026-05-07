@@ -20,10 +20,20 @@ class PlatformEnvTest {
                         "GROUNDS_PROJECT_ID" to "p-1",
                         "GROUNDS_PROJECT_NAME" to "Demo Project",
                         "GROUNDS_FORGE_URL" to "http://forge:8080",
+                        "GROUNDS_APP_NAME" to "arena",
                     )
                 )
             )
-        assertEquals(PlatformEnv("p-1", "Demo Project", "http://forge:8080", pushId = null), env)
+        assertEquals(
+            PlatformEnv(
+                projectId = "p-1",
+                projectName = "Demo Project",
+                forgeUrl = "http://forge:8080",
+                appName = "arena",
+                pushId = null,
+            ),
+            env,
+        )
     }
 
     @Test
@@ -35,6 +45,7 @@ class PlatformEnvTest {
                         "GROUNDS_PROJECT_ID" to "p-1",
                         "GROUNDS_PROJECT_NAME" to "P",
                         "GROUNDS_FORGE_URL" to "http://forge",
+                        "GROUNDS_APP_NAME" to "arena",
                         "GROUNDS_PUSH_ID" to "abc12345-6789-0abc-def0-123456789abc",
                     )
                 )
@@ -51,6 +62,7 @@ class PlatformEnvTest {
                         "GROUNDS_PROJECT_ID" to "p-1",
                         "GROUNDS_PROJECT_NAME" to "P",
                         "GROUNDS_FORGE_URL" to "http://forge:8080/",
+                        "GROUNDS_APP_NAME" to "arena",
                     )
                 )
             )
@@ -61,7 +73,13 @@ class PlatformEnvTest {
     fun `returns null when projectId is missing`() {
         val env =
             readPlatformEnv(
-                reader(mapOf("GROUNDS_PROJECT_NAME" to "P", "GROUNDS_FORGE_URL" to "http://forge"))
+                reader(
+                    mapOf(
+                        "GROUNDS_PROJECT_NAME" to "P",
+                        "GROUNDS_FORGE_URL" to "http://forge",
+                        "GROUNDS_APP_NAME" to "arena",
+                    )
+                )
             )
         assertNull(env)
     }
@@ -75,6 +93,38 @@ class PlatformEnvTest {
                         "GROUNDS_PROJECT_ID" to "   ",
                         "GROUNDS_PROJECT_NAME" to "P",
                         "GROUNDS_FORGE_URL" to "http://forge",
+                        "GROUNDS_APP_NAME" to "arena",
+                    )
+                )
+            )
+        assertNull(env)
+    }
+
+    @Test
+    fun `returns null when appName is missing`() {
+        val env =
+            readPlatformEnv(
+                reader(
+                    mapOf(
+                        "GROUNDS_PROJECT_ID" to "p-1",
+                        "GROUNDS_PROJECT_NAME" to "P",
+                        "GROUNDS_FORGE_URL" to "http://forge",
+                    )
+                )
+            )
+        assertNull(env)
+    }
+
+    @Test
+    fun `returns null when appName is empty after trim`() {
+        val env =
+            readPlatformEnv(
+                reader(
+                    mapOf(
+                        "GROUNDS_PROJECT_ID" to "p-1",
+                        "GROUNDS_PROJECT_NAME" to "P",
+                        "GROUNDS_FORGE_URL" to "http://forge",
+                        "GROUNDS_APP_NAME" to "   ",
                     )
                 )
             )
@@ -99,7 +149,7 @@ class PlatformEnvTest {
     @Test
     fun `data class toString does not include token`() {
         // Defensive: make sure no future change adds the token to PlatformEnv.
-        val env = PlatformEnv("p-1", "Demo", "http://forge")
+        val env = PlatformEnv("p-1", "Demo", "http://forge", "arena")
         val s = env.toString()
         // Sanity — required fields are present
         assert(s.contains("p-1"))

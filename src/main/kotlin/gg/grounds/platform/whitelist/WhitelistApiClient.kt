@@ -4,15 +4,17 @@ import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonClass
 import com.squareup.moshi.Moshi
 import java.net.URI
+import java.net.URLEncoder
 import java.net.http.HttpClient
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
+import java.nio.charset.StandardCharsets
 import java.time.Duration
 
 /**
- * Single forge whitelist row as returned by GET /v1/projects/:id/whitelist. The endpoint also
- * returns `addedAt` and `addedBy`, but the plugin only needs the UUID and current display name —
- * drop the rest at parse time so we don't drag the row shape into the rest of the codebase.
+ * Single forge whitelist row as returned by GET /v1/projects/:id/apps/:appName/whitelist/effective.
+ * The endpoint can return source metadata, but the plugin only needs the UUID and current display
+ * name — drop the rest at parse time so we don't drag the row shape into the rest of the codebase.
  */
 data class WhitelistEntry(val mcUuid: String, val mcUsername: String)
 
@@ -27,6 +29,7 @@ data class WhitelistEntry(val mcUuid: String, val mcUsername: String)
 class WhitelistApiClient(
     private val forgeUrl: String,
     private val projectId: String,
+    private val appName: String,
     private val tokenProvider: () -> String?,
     private val httpClient: HttpClient =
         HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(5)).build(),
@@ -50,7 +53,9 @@ class WhitelistApiClient(
                 ?: throw IllegalStateException(
                     "GROUNDS_TOKEN env var is not set; whitelist fetch refused"
                 )
-        val uri = URI.create("$forgeUrl/v1/projects/$projectId/whitelist")
+        val encodedAppName = URLEncoder.encode(appName, StandardCharsets.UTF_8).replace("+", "%20")
+        val uri =
+            URI.create("$forgeUrl/v1/projects/$projectId/apps/$encodedAppName/whitelist/effective")
         val request =
             HttpRequest.newBuilder(uri)
                 .header("Authorization", "Bearer $token")
@@ -61,13 +66,15 @@ class WhitelistApiClient(
         val response = httpClient.send(request, HttpResponse.BodyHandlers.ofString())
         if (response.statusCode() / 100 != 2) {
             throw RuntimeException(
-                "forge whitelist fetch failed (status=${response.statusCode()}, projectId=$projectId)"
+                "forge whitelist fetch failed (status=${response.statusCode()}, " +
+                    "projectId=$projectId, appName=$appName)"
             )
         }
         val parsed =
             adapter.fromJson(response.body())
                 ?: throw RuntimeException(
-                    "forge whitelist response did not parse as JSON (projectId=$projectId)"
+                    "forge whitelist response did not parse as JSON " +
+                        "(projectId=$projectId, appName=$appName)"
                 )
         return parsed.items.map { WhitelistEntry(mcUuid = it.mcUuid, mcUsername = it.mcUsername) }
     }
