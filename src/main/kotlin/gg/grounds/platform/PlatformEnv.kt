@@ -13,6 +13,7 @@ data class PlatformEnv(
     val projectId: String,
     val projectName: String,
     val forgeUrl: String,
+    val appName: String,
     /**
      * Push ID of the deployment that produced this pod (the renderer's `GROUNDS_PUSH_ID` env).
      * Optional — older deployments may not have it. Surfaced in the MOTD as a "version" tag for
@@ -38,13 +39,15 @@ fun readPlatformEnv(reader: EnvReader = SystemEnvReader): PlatformEnv? {
     val projectId = reader["GROUNDS_PROJECT_ID"]?.trim().orEmpty()
     val projectName = reader["GROUNDS_PROJECT_NAME"]?.trim().orEmpty()
     val forgeUrl = reader["GROUNDS_FORGE_URL"]?.trim().orEmpty()
-    if (projectId.isEmpty() || projectName.isEmpty() || forgeUrl.isEmpty()) {
+    val appName = reader["GROUNDS_APP_NAME"]?.trim().orEmpty()
+    if (projectId.isEmpty() || projectName.isEmpty() || forgeUrl.isEmpty() || appName.isEmpty()) {
         return null
     }
     return PlatformEnv(
         projectId = projectId,
         projectName = projectName,
         forgeUrl = forgeUrl.trimEnd('/'),
+        appName = appName,
         pushId = reader["GROUNDS_PUSH_ID"]?.trim()?.takeIf { it.isNotEmpty() },
     )
 }

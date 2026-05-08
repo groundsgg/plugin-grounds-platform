@@ -25,10 +25,11 @@ class WhitelistApiClientTest {
         server.shutdown()
     }
 
-    private fun client(token: String? = "tok-abc"): WhitelistApiClient =
+    private fun client(token: String? = "tok-abc", appName: String = "arena"): WhitelistApiClient =
         WhitelistApiClient(
             forgeUrl = server.url("/").toString().trimEnd('/'),
             projectId = "p-1",
+            appName = appName,
             tokenProvider = { token },
         )
 
@@ -68,7 +69,21 @@ class WhitelistApiClientTest {
         client(token = "gnds_xxx_yyy").fetch()
         val request = server.takeRequest()
         assertEquals("Bearer gnds_xxx_yyy", request.getHeader("Authorization"))
-        assertTrue(request.path?.endsWith("/v1/projects/p-1/whitelist") == true)
+        assertTrue(
+            request.path?.endsWith("/v1/projects/p-1/apps/arena/whitelist/effective") == true
+        )
+    }
+
+    @Test
+    fun `encodes app name as a path segment`() {
+        server.enqueue(
+            MockResponse().setHeader("Content-Type", "application/json").setBody("""{"items":[]}""")
+        )
+        client(appName = "my plugin").fetch()
+        val request = server.takeRequest()
+        assertTrue(
+            request.path?.endsWith("/v1/projects/p-1/apps/my%20plugin/whitelist/effective") == true
+        )
     }
 
     @Test
@@ -85,6 +100,7 @@ class WhitelistApiClientTest {
             WhitelistApiClient(
                 forgeUrl = server.url("/").toString().trimEnd('/'),
                 projectId = "p-1",
+                appName = "arena",
                 tokenProvider = { null },
             )
         assertThrows<IllegalStateException> { noTokenClient.fetch() }
