@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.3](https://github.com/groundsgg/plugin-grounds-platform/compare/v0.1.2...v0.1.3) (2026-05-08)
+
+
+### Features
+
+* poll effective minecraft whitelist ([#7](https://github.com/groundsgg/plugin-grounds-platform/issues/7)) ([11f8d2a](https://github.com/groundsgg/plugin-grounds-platform/commit/11f8d2ad14550808bcac3b440d4cf434a5ce8d53))
+
 ## [0.1.2](https://github.com/groundsgg/plugin-grounds-platform/compare/v0.1.1...v0.1.2) (2026-05-06)
 
 
