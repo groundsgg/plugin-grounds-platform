@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.4](https://github.com/groundsgg/plugin-grounds-platform/compare/v0.1.3...v0.1.4) (2026-05-09)
+
+
+### Features
+
+* use Adventure component for MOTD ([#9](https://github.com/groundsgg/plugin-grounds-platform/issues/9)) ([71fe02c](https://github.com/groundsgg/plugin-grounds-platform/commit/71fe02c0dd863eaa54f96955d6760255cbf15429))
+
 ## [0.1.3](https://github.com/groundsgg/plugin-grounds-platform/compare/v0.1.2...v0.1.3) (2026-05-08)
 
 
