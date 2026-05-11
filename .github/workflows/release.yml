@@ -7,6 +7,7 @@ on:
 
 permissions:
   contents: write
+  packages: read
 
 jobs:
   build-and-upload:
@@ -25,10 +26,15 @@ jobs:
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v6
 
+      - name: Configure GitHub Packages credentials
+        run: |
+          mkdir -p ~/.gradle
+          {
+            echo "github.user=${{ github.actor }}"
+            echo "github.token=${{ secrets.GITHUB_TOKEN }}"
+          } > ~/.gradle/gradle.properties
+
       - name: Build shadow JAR
-        env:
-          GITHUB_ACTOR: ${{ github.actor }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           tag_name="${GITHUB_REF#refs/tags/}"
           version_override="${tag_name#v}"
