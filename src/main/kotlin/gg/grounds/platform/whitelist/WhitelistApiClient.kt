@@ -21,7 +21,7 @@ data class WhitelistEntry(val mcUuid: String, val mcUsername: String)
 /**
  * Read-only HTTP client for the forge whitelist endpoint. Uses the JDK built-in HttpClient (already
  * on the classpath, no shading required) with a short connect / request timeout — the plugin polls
- * on a 30s cadence so a hung forge shouldn't block the Paper main thread.
+ * on a 30s cadence, so a hung forge shouldn't block the Paper main thread.
  *
  * Auth header is set per request from the GROUNDS_TOKEN env var, never from a stored field, so
  * logging / debugging this client cannot accidentally surface the token.
@@ -44,7 +44,7 @@ class WhitelistApiClient(
 
     /**
      * Fetches the current whitelist. Throws on any non-2xx — caller decides whether to surface or
-     * swallow (the periodic poller swallows + logs at WARN to keep transient forge hiccups from
+     * swallow (the periodic poller swallows and logs at WARN to keep transient forge hiccups from
      * spamming ERROR).
      */
     fun fetch(): List<WhitelistEntry> {
