@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.1](https://github.com/groundsgg/plugin-grounds-platform/compare/v0.2.0...v0.2.1) (2026-05-11)
+
+
+### Bug Fixes
+
+* configure release workflow package credentials ([62ebd31](https://github.com/groundsgg/plugin-grounds-platform/commit/62ebd315e5f6078646e6a0645a21ba7df246d109))
+
 ## [0.2.0](https://github.com/groundsgg/plugin-grounds-platform/compare/v0.1.4...v0.2.0) (2026-05-11)
 
 
