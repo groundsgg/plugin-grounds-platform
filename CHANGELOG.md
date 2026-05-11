@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.2.0](https://github.com/groundsgg/plugin-grounds-platform/compare/v0.1.4...v0.2.0) (2026-05-11)
+
+
+### Features
+
+* update platform plugin to Paper 26.1.2 ([#11](https://github.com/groundsgg/plugin-grounds-platform/issues/11)) ([afb797c](https://github.com/groundsgg/plugin-grounds-platform/commit/afb797cb63345a45bb42cd7c7a723b78846232f9))
+
+
+### Bug Fixes
+
+* use default pre-1.0 release bumps ([524e693](https://github.com/groundsgg/plugin-grounds-platform/commit/524e693f37971b3b67aba72537a3cd919ecdb204))
+
 ## [0.1.4](https://github.com/groundsgg/plugin-grounds-platform/compare/v0.1.3...v0.1.4) (2026-05-09)
 
 
