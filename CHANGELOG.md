@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.3.0](https://github.com/groundsgg/plugin-grounds-platform/compare/v0.2.1...v0.3.0) (2026-05-19)
+
+
+### Features
+
+* add platform command polling ([#14](https://github.com/groundsgg/plugin-grounds-platform/issues/14)) ([b8030e0](https://github.com/groundsgg/plugin-grounds-platform/commit/b8030e00c0ce2b03e9ad8803eb3b1e62cc80f94b))
+
+
+### Bug Fixes
+
+* bound paper command execution wait ([#16](https://github.com/groundsgg/plugin-grounds-platform/issues/16)) ([1bf2a1b](https://github.com/groundsgg/plugin-grounds-platform/commit/1bf2a1b5fe1429e0370eb376b96bb31edd43c4ae))
+
 ## [0.2.1](https://github.com/groundsgg/plugin-grounds-platform/compare/v0.2.0...v0.2.1) (2026-05-11)
 
 
