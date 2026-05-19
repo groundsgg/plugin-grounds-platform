@@ -2,6 +2,6 @@ name: GroundsPlatform
 version: ${VERSION}
 main: gg.grounds.platform.GroundsPlatformPlugin
 api-version: "26.1.2"
-description: "Grounds Platform context for Paper servers — project-aware MOTD + whitelist sync"
+description: "Grounds Platform context for Paper servers — MOTD, whitelist sync, and command execution"
 authors: ["grounds"]
 load: STARTUP
