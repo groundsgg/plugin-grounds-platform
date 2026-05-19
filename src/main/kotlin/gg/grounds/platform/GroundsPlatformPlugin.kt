@@ -4,11 +4,11 @@ import gg.grounds.platform.commands.PlatformCommandExecution
 import gg.grounds.platform.commands.PlatformCommandExecutor
 import gg.grounds.platform.commands.PlatformCommandLogger
 import gg.grounds.platform.commands.PlatformCommandPoller
+import gg.grounds.platform.commands.awaitPaperCommandDispatch
 import gg.grounds.platform.commands.platformCommandEnv
 import gg.grounds.platform.motd.MotdSetter
 import gg.grounds.platform.whitelist.WhitelistApiClient
 import gg.grounds.platform.whitelist.WhitelistSync
-import java.util.concurrent.ExecutionException
 import java.util.logging.Level
 import org.bukkit.plugin.java.JavaPlugin
 import org.bukkit.scheduler.BukkitTask
@@ -118,27 +118,8 @@ class GroundsPlatformPlugin : JavaPlugin() {
                 plugin.server.scheduler.callSyncMethod(plugin) {
                     plugin.server.dispatchCommand(plugin.server.consoleSender, command)
                 }
-            val handled =
-                try {
-                    future.get()
-                } catch (exception: InterruptedException) {
-                    future.cancel(true)
-                    Thread.currentThread().interrupt()
-                    return PlatformCommandExecution.failed("Command execution interrupted")
-                } catch (exception: ExecutionException) {
-                    return PlatformCommandExecution.failed(
-                        "Command execution failed (reason=${exception.cause.reason()})"
-                    )
-                }
-
-            return if (handled) {
-                PlatformCommandExecution.executed("Command executed")
-            } else {
-                PlatformCommandExecution.failed("Command was not handled")
-            }
+            return awaitPaperCommandDispatch(future)
         }
-
-        private fun Throwable?.reason(): String = this?.javaClass?.simpleName ?: "unknown"
     }
 
     private class PaperPlatformCommandLogger(private val plugin: GroundsPlatformPlugin) :
