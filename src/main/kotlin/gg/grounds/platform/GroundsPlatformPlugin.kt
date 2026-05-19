@@ -1,8 +1,14 @@
 package gg.grounds.platform
 
+import gg.grounds.platform.commands.PlatformCommandExecution
+import gg.grounds.platform.commands.PlatformCommandExecutor
+import gg.grounds.platform.commands.PlatformCommandLogger
+import gg.grounds.platform.commands.PlatformCommandPoller
+import gg.grounds.platform.commands.platformCommandEnv
 import gg.grounds.platform.motd.MotdSetter
 import gg.grounds.platform.whitelist.WhitelistApiClient
 import gg.grounds.platform.whitelist.WhitelistSync
+import java.util.concurrent.ExecutionException
 import java.util.logging.Level
 import org.bukkit.plugin.java.JavaPlugin
 import org.bukkit.scheduler.BukkitTask
@@ -18,6 +24,7 @@ import org.bukkit.scheduler.BukkitTask
 class GroundsPlatformPlugin : JavaPlugin() {
 
     private var pollTask: BukkitTask? = null
+    private var commandPoller: PlatformCommandPoller? = null
 
     override fun onEnable() {
         val env = readPlatformEnv()
@@ -29,12 +36,21 @@ class GroundsPlatformPlugin : JavaPlugin() {
             )
             return
         }
-        if (readForgeToken() == null) {
+        val forgeToken = readForgeToken()
+        if (forgeToken == null) {
             logger.warning(
                 "Whitelist sync disabled (reason=GROUNDS_TOKEN_unset, " +
                     "projectId=${env.projectId}, appName=${env.appName})"
             )
         }
+
+        commandPoller =
+            PlatformCommandPoller(
+                    env = platformCommandEnv(env, forgeToken),
+                    executor = PaperPlatformCommandExecutor(this),
+                    logger = PaperPlatformCommandLogger(this),
+                )
+                .also { it.start() }
 
         MotdSetter(server).apply(env.projectName, env.pushId)
         logger.info(
@@ -89,7 +105,54 @@ class GroundsPlatformPlugin : JavaPlugin() {
     }
 
     override fun onDisable() {
+        commandPoller?.close()
+        commandPoller = null
         pollTask?.cancel()
         pollTask = null
+    }
+
+    private class PaperPlatformCommandExecutor(private val plugin: GroundsPlatformPlugin) :
+        PlatformCommandExecutor {
+        override fun execute(command: String): PlatformCommandExecution {
+            val future =
+                plugin.server.scheduler.callSyncMethod(plugin) {
+                    plugin.server.dispatchCommand(plugin.server.consoleSender, command)
+                }
+            val handled =
+                try {
+                    future.get()
+                } catch (exception: InterruptedException) {
+                    future.cancel(true)
+                    Thread.currentThread().interrupt()
+                    return PlatformCommandExecution.failed("Command execution interrupted")
+                } catch (exception: ExecutionException) {
+                    return PlatformCommandExecution.failed(
+                        "Command execution failed (reason=${exception.cause.reason()})"
+                    )
+                }
+
+            return if (handled) {
+                PlatformCommandExecution.executed("Command executed")
+            } else {
+                PlatformCommandExecution.failed("Command was not handled")
+            }
+        }
+
+        private fun Throwable?.reason(): String = this?.javaClass?.simpleName ?: "unknown"
+    }
+
+    private class PaperPlatformCommandLogger(private val plugin: GroundsPlatformPlugin) :
+        PlatformCommandLogger {
+        override fun warn(message: String, throwable: Throwable?) {
+            plugin.logger.log(Level.WARNING, message, throwable)
+        }
+
+        override fun info(message: String) {
+            plugin.logger.info(message)
+        }
+
+        override fun error(message: String, throwable: Throwable?) {
+            plugin.logger.log(Level.SEVERE, message, throwable)
+        }
     }
 }

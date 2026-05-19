@@ -6,25 +6,30 @@ loaded automatically alongside the user's own plugin.
 
 ## What it does
 
-Reads four env vars set by [grounds-forge][forge]'s deploy renderer:
+Reads env vars set by [grounds-forge][forge]'s deploy renderer:
 
 | Env | Purpose |
 |---|---|
 | `GROUNDS_PROJECT_ID` | Project the workload belongs to. |
 | `GROUNDS_PROJECT_NAME` | Used for the project-aware MOTD. |
-| `GROUNDS_FORGE_URL` | In-cluster URL the plugin polls for whitelist updates. |
+| `GROUNDS_APP_NAME` | Deployment name used for app-scoped platform APIs. |
+| `GROUNDS_PUSH_ID` | Push identity used to scope command leases to the running workload version. |
+| `GROUNDS_FORGE_URL` | In-cluster URL the plugin polls for platform updates. |
 | `GROUNDS_TOKEN` | Workload-scoped service-account token. Mounted from a K8s Secret, never logged. |
 
-When all four are set the plugin:
+When the required platform context is set the plugin:
 
 1. Replaces the default Paper MOTD with the project name + `via Grounds`.
 2. Enables the server whitelist (idempotent — `whitelist=true` only when off).
 3. Polls `GET /v1/projects/<id>/whitelist` every 30s and reconciles the
    local whitelist against the snapshot. Mojang UUIDs from the forge
    side are the source of truth; usernames are display-only.
+4. Long-polls Forge for queued console commands, executes each command as
+   the Paper console, and posts the execution result back to Forge.
 
-When any of the env vars is missing the plugin logs one WARN line and
-stays inert — the user's gameplay is unaffected.
+When the base platform env vars are missing the plugin logs one WARN line and
+stays inert — the user's gameplay is unaffected. Command polling is disabled
+separately when `GROUNDS_PUSH_ID` or `GROUNDS_TOKEN` is missing.
 
 ## Build
 
