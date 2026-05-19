@@ -40,10 +40,9 @@ class PlatformCommandClient(
     private val httpClient: HttpClient =
         HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(10)).build(),
 ) : PlatformCommandService {
-    private val leaseAdapter: JsonAdapter<LeaseResponse> =
-        Moshi.Builder().build().adapter(LeaseResponse::class.java)
-    private val resultAdapter: JsonAdapter<ResultRequest> =
-        Moshi.Builder().build().adapter(ResultRequest::class.java)
+    private val moshi: Moshi = Moshi.Builder().build()
+    private val leaseAdapter: JsonAdapter<LeaseResponse> = moshi.adapter(LeaseResponse::class.java)
+    private val resultAdapter: JsonAdapter<ResultRequest> = moshi.adapter(ResultRequest::class.java)
 
     override fun leaseCommand(): PlatformCommandLease? {
         val response =
