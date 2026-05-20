@@ -5,7 +5,7 @@ import java.util.concurrent.Executors
 import java.util.concurrent.Future
 import java.util.concurrent.atomic.AtomicBoolean
 
-interface PlatformCommandExecutor {
+fun interface PlatformCommandExecutor {
     fun execute(command: String): PlatformCommandExecution
 }
 
@@ -83,7 +83,7 @@ class PlatformCommandPoller(
         val lease =
             try {
                 service.leaseCommand()
-            } catch (exception: InterruptedException) {
+            } catch (_: InterruptedException) {
                 Thread.currentThread().interrupt()
                 return
             } catch (exception: Exception) {
@@ -93,38 +93,39 @@ class PlatformCommandPoller(
                 )
                 sleepAfterLeaseFailure()
                 return
-            } ?: return
+            }
+        lease?.let { commandLease ->
+            val execution =
+                try {
+                    executor.execute(commandLease.command)
+                } catch (exception: Exception) {
+                    PlatformCommandExecution.failed(
+                        "Command execution failed (reason=${exception.reason()})"
+                    )
+                }
+            if (Thread.currentThread().isInterrupted) return
 
-        val execution =
             try {
-                executor.execute(lease.command)
+                service.postResult(
+                    commandId = commandLease.id,
+                    result =
+                        PlatformCommandResult(
+                            leaseToken = commandLease.leaseToken,
+                            status = execution.status,
+                            message = execution.message,
+                        ),
+                )
+                logger.info(
+                    "Platform command result posted successfully (appName=${enabledEnv.appName}, projectId=${enabledEnv.projectId}, pushId=${enabledEnv.pushId.logValue()}, commandId=${commandLease.id}, status=${execution.status.wireValue})"
+                )
+            } catch (_: InterruptedException) {
+                Thread.currentThread().interrupt()
             } catch (exception: Exception) {
-                PlatformCommandExecution.failed(
-                    "Command execution failed (reason=${exception.reason()})"
+                logger.error(
+                    "Failed to post platform command result (appName=${enabledEnv.appName}, projectId=${enabledEnv.projectId}, pushId=${enabledEnv.pushId.logValue()}, commandId=${commandLease.id}, reason=${exception.reason()})",
+                    exception,
                 )
             }
-        if (Thread.currentThread().isInterrupted) return
-
-        try {
-            service.postResult(
-                commandId = lease.id,
-                result =
-                    PlatformCommandResult(
-                        leaseToken = lease.leaseToken,
-                        status = execution.status,
-                        message = execution.message,
-                    ),
-            )
-            logger.info(
-                "Platform command result posted successfully (appName=${enabledEnv.appName}, projectId=${enabledEnv.projectId}, pushId=${enabledEnv.pushId.logValue()}, commandId=${lease.id}, status=${execution.status.wireValue})"
-            )
-        } catch (exception: InterruptedException) {
-            Thread.currentThread().interrupt()
-        } catch (exception: Exception) {
-            logger.error(
-                "Failed to post platform command result (appName=${enabledEnv.appName}, projectId=${enabledEnv.projectId}, pushId=${enabledEnv.pushId.logValue()}, commandId=${lease.id}, reason=${exception.reason()})",
-                exception,
-            )
         }
     }
 
@@ -140,7 +141,7 @@ class PlatformCommandPoller(
     private fun sleepAfterLeaseFailure() {
         try {
             sleeper(backoffMillis)
-        } catch (exception: InterruptedException) {
+        } catch (_: InterruptedException) {
             Thread.currentThread().interrupt()
         }
     }

@@ -18,7 +18,7 @@ import org.bukkit.scheduler.BukkitTask
  * everything's wired, and otherwise logs a single warning and stays inert.
  *
  * The plugin is intentionally fault-tolerant: any error during a single sync iteration is logged at
- * WARN and the next tick of the scheduler retries on its own. We never throw out of the scheduled
+ * WARN, and the next tick of the scheduler retries on its own. We never throw out of the scheduled
  * task — Paper would log a stack trace per occurrence and that obscures the actual server output.
  */
 class GroundsPlatformPlugin : JavaPlugin() {

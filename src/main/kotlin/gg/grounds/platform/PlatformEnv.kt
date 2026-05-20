@@ -22,13 +22,11 @@ data class PlatformEnv(
     val pushId: String? = null,
 )
 
-interface EnvReader {
+fun interface EnvReader {
     operator fun get(name: String): String?
 }
 
-object SystemEnvReader : EnvReader {
-    override fun get(name: String): String? = System.getenv(name)
-}
+val SystemEnvReader: EnvReader = EnvReader { name -> System.getenv(name) }
 
 /**
  * Returns null when any of the required platform-context env vars are missing — the plugin treats

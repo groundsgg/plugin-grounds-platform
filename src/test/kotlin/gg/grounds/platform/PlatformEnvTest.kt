@@ -6,10 +6,7 @@ import org.junit.jupiter.api.Test
 
 class PlatformEnvTest {
 
-    private fun reader(map: Map<String, String>): EnvReader =
-        object : EnvReader {
-            override fun get(name: String): String? = map[name]
-        }
+    private fun reader(map: Map<String, String>): EnvReader = EnvReader { name -> map[name] }
 
     @Test
     fun `returns env when all four required vars are present`() {
