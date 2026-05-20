@@ -15,14 +15,14 @@ internal fun awaitPaperCommandDispatch(
     val handled =
         try {
             future.get(timeoutMillis, TimeUnit.MILLISECONDS)
-        } catch (exception: InterruptedException) {
+        } catch (_: InterruptedException) {
             future.cancel(true)
             Thread.currentThread().interrupt()
             return PlatformCommandExecution.failed("Command execution interrupted")
-        } catch (exception: TimeoutException) {
+        } catch (_: TimeoutException) {
             future.cancel(true)
             return PlatformCommandExecution.failed("Command execution timed out")
-        } catch (exception: CancellationException) {
+        } catch (_: CancellationException) {
             return PlatformCommandExecution.failed("Command execution cancelled")
         } catch (exception: ExecutionException) {
             return PlatformCommandExecution.failed(
