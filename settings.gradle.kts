@@ -12,3 +12,5 @@ pluginManagement {
 }
 
 rootProject.name = "plugin-grounds-platform"
+
+include("common", "paper", "velocity")

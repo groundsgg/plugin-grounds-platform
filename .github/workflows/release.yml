@@ -34,15 +34,20 @@ jobs:
             echo "github.token=${{ secrets.GITHUB_TOKEN }}"
           } > ~/.gradle/gradle.properties
 
-      - name: Build shadow JAR
+      - name: Build shadow JARs
         run: |
           tag_name="${GITHUB_REF#refs/tags/}"
           version_override="${tag_name#v}"
-          ./gradlew shadowJar -PversionOverride="$version_override"
+          ./gradlew :paper:shadowJar :velocity:shadowJar -PversionOverride="$version_override"
 
-      - name: Upload JAR to release
+      - name: Upload JARs to release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           tag_name="${GITHUB_REF#refs/tags/}"
-          gh release upload "$tag_name" build/libs/plugin-grounds-platform-*-all.jar --clobber
+          # Paper artifact keeps the historical name plugin-grounds-platform-<v>-all.jar;
+          # the velocity proxy artifact is plugin-grounds-platform-velocity-<v>-all.jar.
+          gh release upload "$tag_name" \
+            paper/build/libs/plugin-grounds-platform-*-all.jar \
+            velocity/build/libs/plugin-grounds-platform-velocity-*-all.jar \
+            --clobber
