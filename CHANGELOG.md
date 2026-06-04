@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.4.0](https://github.com/groundsgg/plugin-grounds-platform/compare/v0.3.0...v0.4.0) (2026-06-04)
+
+
+### Features
+
+* **velocity:** add a velocity module (proxy whitelist gate + MOTD) ([#19](https://github.com/groundsgg/plugin-grounds-platform/issues/19)) ([fca4143](https://github.com/groundsgg/plugin-grounds-platform/commit/fca4143eecaaca45143d855ca234d762ed0333fb))
+
+
+### Bug Fixes
+
+* **commands:** clean up platform command review items ([#17](https://github.com/groundsgg/plugin-grounds-platform/issues/17)) ([727fb04](https://github.com/groundsgg/plugin-grounds-platform/commit/727fb041930f9789ad58a35a82c047892b91e254))
+
 ## [0.3.0](https://github.com/groundsgg/plugin-grounds-platform/compare/v0.2.1...v0.3.0) (2026-05-19)
 
 
