@@ -100,7 +100,8 @@ constructor(private val proxy: ProxyServer, private val logger: Logger) {
                     .mapNotNull { runCatching { UUID.fromString(it.mcUuid) }.getOrNull() }
                     .toSet()
             whitelist.set(uuids)
-            logger.info("Whitelist synced (size={})", uuids.size)
+            // Routine periodic sync — debug only; a failed fetch logs warn below.
+            logger.debug("Whitelist synced (size={})", uuids.size)
         } catch (ex: Exception) {
             logger.warn("Whitelist fetch failed (reason={}); keeping previous snapshot", ex.message)
         }
