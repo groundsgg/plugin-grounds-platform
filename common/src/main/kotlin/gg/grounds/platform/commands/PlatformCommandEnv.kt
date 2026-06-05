@@ -7,11 +7,12 @@ sealed class PlatformCommandEnv {
         val forgeUrl: String,
         val projectId: String,
         val appName: String,
+        val deploymentName: String = appName,
         val pushId: String,
         val token: String,
     ) : PlatformCommandEnv() {
         override fun toString(): String =
-            "Enabled(forgeUrl=$forgeUrl, projectId=$projectId, appName=$appName, pushId=$pushId, token=<redacted>)"
+            "Enabled(forgeUrl=$forgeUrl, projectId=$projectId, appName=$appName, deploymentName=$deploymentName, pushId=$pushId, token=<redacted>)"
     }
 
     data class Disabled(
@@ -55,6 +56,7 @@ private fun platformCommandEnvInternal(
         forgeUrl = platformEnv.forgeUrl,
         projectId = platformEnv.projectId,
         appName = platformEnv.appName,
+        deploymentName = platformEnv.resourceName,
         pushId = pushId,
         token = token,
     )

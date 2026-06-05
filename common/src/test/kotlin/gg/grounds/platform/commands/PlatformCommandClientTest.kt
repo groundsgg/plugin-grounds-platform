@@ -26,7 +26,7 @@ class PlatformCommandClientTest {
         assertNull(lease)
         val request = server.takeRequest()
         assertEquals(
-            "/v1/platform/deployments/survival/commands/lease?projectId=project-1&pushId=push-9&waitMs=25000",
+            "/v1/platform/deployments/survival-paper/commands/lease?projectId=project-1&pushId=push-9&waitMs=25000",
             request.path,
         )
         assertEquals("Bearer token-1", request.getHeader("Authorization"))
@@ -81,7 +81,10 @@ class PlatformCommandClientTest {
             )
 
         val request = server.takeRequest()
-        assertEquals("/v1/platform/deployments/survival/commands/command-1/result", request.path)
+        assertEquals(
+            "/v1/platform/deployments/survival-paper/commands/command-1/result",
+            request.path,
+        )
         assertEquals(
             """{"leaseToken":"lease-1","status":"executed","message":"Command executed"}""",
             request.body.readUtf8(),
@@ -95,6 +98,7 @@ class PlatformCommandClientTest {
                     forgeUrl = server.url("/").toString().trimEnd('/'),
                     projectId = "project-1",
                     appName = "survival",
+                    deploymentName = "survival-paper",
                     pushId = "push-9",
                     token = "token-1",
                 ),

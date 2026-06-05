@@ -51,6 +51,60 @@ class PlatformEnvTest {
     }
 
     @Test
+    fun `resourceName surfaces when explicit env is set`() {
+        val env =
+            readPlatformEnv(
+                reader(
+                    mapOf(
+                        "GROUNDS_PROJECT_ID" to "p-1",
+                        "GROUNDS_PROJECT_NAME" to "P",
+                        "GROUNDS_FORGE_URL" to "http://forge",
+                        "GROUNDS_APP_NAME" to "arena",
+                        "GROUNDS_RESOURCE_NAME" to " arena-paper ",
+                    )
+                )
+            )
+
+        assertEquals("arena-paper", env?.resourceName)
+    }
+
+    @Test
+    fun `resourceName falls back to deployment name derived from pod hostname`() {
+        val env =
+            readPlatformEnv(
+                reader(
+                    mapOf(
+                        "GROUNDS_PROJECT_ID" to "p-1",
+                        "GROUNDS_PROJECT_NAME" to "P",
+                        "GROUNDS_FORGE_URL" to "http://forge",
+                        "GROUNDS_APP_NAME" to "arena",
+                        "HOSTNAME" to "arena-paper-6845cdf8cb-nsmm5",
+                    )
+                )
+            )
+
+        assertEquals("arena-paper", env?.resourceName)
+    }
+
+    @Test
+    fun `resourceName falls back to appName when pod hostname is not deployment-managed`() {
+        val env =
+            readPlatformEnv(
+                reader(
+                    mapOf(
+                        "GROUNDS_PROJECT_ID" to "p-1",
+                        "GROUNDS_PROJECT_NAME" to "P",
+                        "GROUNDS_FORGE_URL" to "http://forge",
+                        "GROUNDS_APP_NAME" to "arena",
+                        "HOSTNAME" to "arena",
+                    )
+                )
+            )
+
+        assertEquals("arena", env?.resourceName)
+    }
+
+    @Test
     fun `strips trailing slash from forgeUrl`() {
         val env =
             readPlatformEnv(
