@@ -2,7 +2,14 @@ import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 
 plugins { id("gg.grounds.velocity-conventions") }
 
-dependencies { implementation(project(":common")) }
+dependencies {
+    implementation(project(":common"))
+
+    testCompileOnly("com.velocitypowered:velocity-api:3.5.0-SNAPSHOT")
+    testImplementation("org.junit.jupiter:junit-jupiter:5.11.3")
+    testRuntimeOnly("com.velocitypowered:velocity-api:3.5.0-SNAPSHOT")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+}
 
 tasks.named<ShadowJar>("shadowJar") {
     // Published as `plugin-grounds-platform-velocity-<version>-all.jar` — the
