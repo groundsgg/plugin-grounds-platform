@@ -14,6 +14,7 @@ data class PlatformEnv(
     val projectName: String,
     val forgeUrl: String,
     val appName: String,
+    val resourceName: String = appName,
     /**
      * Push ID of the deployment that produced this pod (the renderer's `GROUNDS_PUSH_ID` env).
      * Optional — older deployments may not have it. Surfaced in the MOTD as a "version" tag for
@@ -41,11 +42,16 @@ fun readPlatformEnv(reader: EnvReader = SystemEnvReader): PlatformEnv? {
     if (projectId.isEmpty() || projectName.isEmpty() || forgeUrl.isEmpty() || appName.isEmpty()) {
         return null
     }
+    val resourceName =
+        reader["GROUNDS_RESOURCE_NAME"]?.trim()?.takeIf { it.isNotEmpty() }
+            ?: deploymentNameFromPodHostname(reader["HOSTNAME"]?.trim())
+            ?: appName
     return PlatformEnv(
         projectId = projectId,
         projectName = projectName,
         forgeUrl = forgeUrl.trimEnd('/'),
         appName = appName,
+        resourceName = resourceName,
         pushId = reader["GROUNDS_PUSH_ID"]?.trim()?.takeIf { it.isNotEmpty() },
     )
 }
@@ -58,3 +64,9 @@ fun readPlatformEnv(reader: EnvReader = SystemEnvReader): PlatformEnv? {
  */
 fun readForgeToken(reader: EnvReader = SystemEnvReader): String? =
     reader["GROUNDS_TOKEN"]?.trim()?.takeIf { it.isNotEmpty() }
+
+private fun deploymentNameFromPodHostname(hostname: String?): String? {
+    if (hostname.isNullOrBlank()) return null
+    val match = Regex("^(.+)-[a-z0-9]{9,10}-[a-z0-9]{5}$").matchEntire(hostname) ?: return null
+    return match.groupValues[1].takeIf { it.isNotBlank() }
+}

@@ -77,7 +77,7 @@ class PlatformCommandClient(
 
     private fun leaseUri(): URI =
         endpoint(
-            "/v1/platform/deployments/${encode(env.appName)}/commands/lease",
+            "/v1/platform/deployments/${encode(env.deploymentName)}/commands/lease",
             buildList {
                 add("projectId=${encode(env.projectId)}")
                 add("pushId=${encode(env.pushId)}")
@@ -87,7 +87,7 @@ class PlatformCommandClient(
 
     private fun resultUri(commandId: String): URI =
         endpoint(
-            "/v1/platform/deployments/${encode(env.appName)}/commands/${encode(commandId)}/result",
+            "/v1/platform/deployments/${encode(env.deploymentName)}/commands/${encode(commandId)}/result",
             emptyList(),
         )
 

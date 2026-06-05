@@ -50,7 +50,7 @@ class PlatformCommandPoller(
             is PlatformCommandEnv.Enabled -> {
                 if (started.compareAndSet(false, true)) {
                     logger.info(
-                        "Platform command polling started successfully (appName=${env.appName}, projectId=${env.projectId}, pushId=${env.pushId.logValue()})"
+                        "Platform command polling started successfully (appName=${env.appName}, deploymentName=${env.deploymentName}, projectId=${env.projectId}, pushId=${env.pushId.logValue()})"
                     )
                     future = worker.submit { pollLoop() }
                 }
@@ -88,7 +88,7 @@ class PlatformCommandPoller(
                 return
             } catch (exception: Exception) {
                 logger.warn(
-                    "Failed to lease platform command (appName=${enabledEnv.appName}, projectId=${enabledEnv.projectId}, pushId=${enabledEnv.pushId.logValue()}, reason=${exception.reason()})",
+                    "Failed to lease platform command (appName=${enabledEnv.appName}, deploymentName=${enabledEnv.deploymentName}, projectId=${enabledEnv.projectId}, pushId=${enabledEnv.pushId.logValue()}, reason=${exception.reason()})",
                     exception,
                 )
                 sleepAfterLeaseFailure()
@@ -116,13 +116,13 @@ class PlatformCommandPoller(
                         ),
                 )
                 logger.info(
-                    "Platform command result posted successfully (appName=${enabledEnv.appName}, projectId=${enabledEnv.projectId}, pushId=${enabledEnv.pushId.logValue()}, commandId=${commandLease.id}, status=${execution.status.wireValue})"
+                    "Platform command result posted successfully (appName=${enabledEnv.appName}, deploymentName=${enabledEnv.deploymentName}, projectId=${enabledEnv.projectId}, pushId=${enabledEnv.pushId.logValue()}, commandId=${commandLease.id}, status=${execution.status.wireValue})"
                 )
             } catch (_: InterruptedException) {
                 Thread.currentThread().interrupt()
             } catch (exception: Exception) {
                 logger.error(
-                    "Failed to post platform command result (appName=${enabledEnv.appName}, projectId=${enabledEnv.projectId}, pushId=${enabledEnv.pushId.logValue()}, commandId=${commandLease.id}, reason=${exception.reason()})",
+                    "Failed to post platform command result (appName=${enabledEnv.appName}, deploymentName=${enabledEnv.deploymentName}, projectId=${enabledEnv.projectId}, pushId=${enabledEnv.pushId.logValue()}, commandId=${commandLease.id}, reason=${exception.reason()})",
                     exception,
                 )
             }
