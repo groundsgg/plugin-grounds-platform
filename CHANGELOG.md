@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.1](https://github.com/groundsgg/plugin-grounds-platform/compare/v0.4.0...v0.4.1) (2026-06-05)
+
+
+### Bug Fixes
+
+* **velocity:** drop routine "Whitelist synced" log to debug ([#20](https://github.com/groundsgg/plugin-grounds-platform/issues/20)) ([f74ef47](https://github.com/groundsgg/plugin-grounds-platform/commit/f74ef472e908d8e4c80ba05b41714fa72855b758))
+
 ## [0.4.0](https://github.com/groundsgg/plugin-grounds-platform/compare/v0.3.0...v0.4.0) (2026-06-04)
 
 
