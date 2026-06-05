@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.5.0](https://github.com/groundsgg/plugin-grounds-platform/compare/v0.4.1...v0.5.0) (2026-06-05)
+
+
+### Features
+
+* add velocity platform command execution ([#24](https://github.com/groundsgg/plugin-grounds-platform/issues/24)) ([d927e58](https://github.com/groundsgg/plugin-grounds-platform/commit/d927e58e7f539dd1e4600f508ae78f8035320338))
+
+
+### Bug Fixes
+
+* use deployment resource for platform commands ([#22](https://github.com/groundsgg/plugin-grounds-platform/issues/22)) ([bf029fb](https://github.com/groundsgg/plugin-grounds-platform/commit/bf029fba2359045116f9210988f6500eb4bec81d))
+
 ## [0.4.1](https://github.com/groundsgg/plugin-grounds-platform/compare/v0.4.0...v0.4.1) (2026-06-05)
 
 
