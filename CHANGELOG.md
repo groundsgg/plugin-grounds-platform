@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.0](https://github.com/groundsgg/plugin-grounds-platform/compare/v0.5.0...v0.6.0) (2026-07-11)
+
+
+### Features
+
+* **velocity:** serve the Grounds logo as the server icon ([#25](https://github.com/groundsgg/plugin-grounds-platform/issues/25)) ([e6f6ab4](https://github.com/groundsgg/plugin-grounds-platform/commit/e6f6ab4bee077542931683a2f4192418361cf192))
+
 ## [0.5.0](https://github.com/groundsgg/plugin-grounds-platform/compare/v0.4.1...v0.5.0) (2026-06-05)
 
 
