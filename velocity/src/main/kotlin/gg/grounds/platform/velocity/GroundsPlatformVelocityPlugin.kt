@@ -9,6 +9,7 @@ import com.velocitypowered.api.event.proxy.ProxyPingEvent
 import com.velocitypowered.api.event.proxy.ProxyShutdownEvent
 import com.velocitypowered.api.plugin.Plugin
 import com.velocitypowered.api.proxy.ProxyServer
+import com.velocitypowered.api.util.Favicon
 import gg.grounds.BuildInfo
 import gg.grounds.platform.PlatformEnv
 import gg.grounds.platform.commands.PlatformCommandLogger
@@ -18,6 +19,12 @@ import gg.grounds.platform.readForgeToken
 import gg.grounds.platform.readPlatformEnv
 import gg.grounds.platform.velocity.commands.VelocityPlatformCommandExecutor
 import gg.grounds.platform.whitelist.WhitelistApiClient
+import java.net.URI
+import java.net.http.HttpClient
+import java.net.http.HttpRequest
+import java.net.http.HttpResponse
+import java.time.Duration
+import java.util.Base64
 import java.util.UUID
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicReference
@@ -36,6 +43,9 @@ import org.slf4j.Logger
  *   matching the Paper MOTD.
  * - **Platform commands.** Poll Forge for queued deployment commands and dispatch them through the
  *   Velocity console command source.
+ * - **Server icon.** The Grounds logo, fetched once at startup and served with every ping. Unlike
+ *   the MOTD this is brand, not project context, so it is applied even when the platform env is
+ *   missing — and a failed fetch only costs the icon, never the ping.
  *
  * The @Subscribe methods on the main @Plugin class are auto-registered by Velocity. The HTTP
  * client + env reader come from the shared :common module.
@@ -59,9 +69,14 @@ constructor(private val proxy: ProxyServer, private val logger: Logger) {
     @Volatile private var env: PlatformEnv? = null
     @Volatile private var client: WhitelistApiClient? = null
     @Volatile private var commandPoller: PlatformCommandPoller? = null
+    @Volatile private var favicon: Favicon? = null
 
     @Subscribe
     fun onProxyInitialize(event: ProxyInitializeEvent) {
+        // Off the init thread: a slow CDN must not hold up proxy startup. Pings
+        // that land before it resolves simply carry no icon.
+        proxy.scheduler.buildTask(this, Runnable { loadFavicon() }).schedule()
+
         val e = readPlatformEnv()
         if (e == null) {
             logger.warn(
@@ -147,31 +162,82 @@ constructor(private val proxy: ProxyServer, private val logger: Logger) {
         }
     }
 
+    /**
+     * Fetch the Grounds logo and keep it as a [Favicon]. Velocity requires exactly 64x64 PNG; the
+     * CDN serves that. Any failure is logged and swallowed — the proxy then simply pings without an
+     * icon rather than not pinging at all.
+     */
+    private fun loadFavicon() {
+        try {
+            val response =
+                HttpClient.newBuilder()
+                    .connectTimeout(ICON_TIMEOUT)
+                    .build()
+                    .send(
+                        HttpRequest.newBuilder(URI.create(ICON_URL))
+                            .timeout(ICON_TIMEOUT)
+                            .GET()
+                            .build(),
+                        HttpResponse.BodyHandlers.ofByteArray(),
+                    )
+            if (response.statusCode() != 200) {
+                logger.warn(
+                    "Server icon unavailable (url={}, status={}); serving pings without one",
+                    ICON_URL,
+                    response.statusCode(),
+                )
+                return
+            }
+            val base64 = Base64.getEncoder().encodeToString(response.body())
+            favicon = Favicon("data:image/png;base64,$base64")
+            logger.info("Server icon loaded (url={}, bytes={})", ICON_URL, response.body().size)
+        } catch (ex: Exception) {
+            logger.warn(
+                "Server icon unavailable (url={}, reason={}); serving pings without one",
+                ICON_URL,
+                ex.message,
+            )
+        }
+    }
+
     @Subscribe
     fun onProxyPing(event: ProxyPingEvent) {
-        val e = env ?: return
+        var builder = event.ping.asBuilder()
+
+        // Brand, not project context — applied even when the platform env is absent.
+        favicon?.let { builder = builder.favicon(it) }
+
+        env?.let { builder = builder.description(motdFor(it)) }
+
+        event.ping = builder.build()
+    }
+
+    /** Project name + short push id, then the platform line. Mirrors the Paper MotdSetter. */
+    private fun motdFor(e: PlatformEnv): Component {
         val shortPushId =
             e.pushId?.replace("-", "")?.take(SHORT_PUSH_ID_LEN)?.takeIf { it.isNotEmpty() }
         val builder = Component.text().append(Component.text(e.projectName, NamedTextColor.WHITE))
         if (shortPushId != null) {
             builder.append(Component.text(" $shortPushId", NamedTextColor.DARK_GRAY))
         }
-        val motd =
-            builder
-                .append(Component.newline())
-                .append(
-                    Component.text(
-                        "powered by Grounds Developer Platform",
-                        NamedTextColor.DARK_GRAY,
-                    )
-                )
-                .build()
-        event.ping = event.ping.asBuilder().description(motd).build()
+        return builder
+            .append(Component.newline())
+            .append(
+                Component.text("powered by Grounds Developer Platform", NamedTextColor.DARK_GRAY)
+            )
+            .build()
     }
 
     private companion object {
         const val WHITELIST_POLL_SECONDS = 30L
         const val SHORT_PUSH_ID_LEN = 8
+
+        /**
+         * Served from the CDN rather than bundled in the jar so the logo can be swapped without a
+         * plugin release. Must stay a 64x64 PNG — Velocity rejects anything else.
+         */
+        const val ICON_URL = "https://cdn.grounds.gg/logo/icon-64x.png"
+        val ICON_TIMEOUT: Duration = Duration.ofSeconds(5)
     }
 
     private class VelocityPlatformCommandLogger(private val logger: Logger) :
